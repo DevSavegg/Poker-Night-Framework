@@ -274,9 +274,16 @@ public class GameEngine {
     }
 
     private void placeBet(Player player, int amount, ActionType type, boolean isBlind) {
-        // Cap bet at player's stack
+        // Cap bet at player's stack first
         int actualAmount = Math.min(amount, player.getChipStack());
 
+        PlayerAction checkAction = new PlayerAction(player, type, actualAmount);
+
+        if (!currentMode.getBettingStructure().isBetValid(checkAction, context)) {
+            throw new IllegalArgumentException("Invalid bet amount for this structure: " + actualAmount);
+        }
+
+        // Modifying State
         player.bet(actualAmount);
         potManager.processBet(player, actualAmount);
 
@@ -288,6 +295,7 @@ public class GameEngine {
         // Update Context (High Bet / Min Raise)
         if (newRoundTotal > context.getCurrentBet()) {
             int increase = newRoundTotal - context.getCurrentBet();
+
             // Only increase min-raise if it's a "full" raise
             if (increase >= context.getMinRaise()) {
                 context.setMinRaise(increase);
@@ -309,7 +317,7 @@ public class GameEngine {
         Map<Player, HandRank> hands = new HashMap<>();
         List<Player> active = tableManager.getAllPlayers().stream()
                 .filter(p -> !p.isFolded())
-                .collect(Collectors.toList());
+                .toList();
 
         for (Player p : active) {
             HandRank rank = currentMode.getEvaluator().evaluate(p.getHoleCards(), context.getCommunityCards());
@@ -347,6 +355,7 @@ public class GameEngine {
     // -- Helpers & Validation --
 
     private List<ActionType> getLegalActions(Player p) {
+        int maxBet = currentMode.getBettingStructure().calculateMaxBet(context);
         List<ActionType> actions = new ArrayList<>();
         actions.add(ActionType.FOLD);
 

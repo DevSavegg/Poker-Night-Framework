@@ -4,7 +4,7 @@ import studio.devsavegg.core.GameContext;
 import studio.devsavegg.core.PlayerAction;
 
 public interface IBettingStructure {
-    int getMinRaise(GameContext context);
-    int getMaxRaise(GameContext context);
-    boolean validateAction(PlayerAction action, GameContext context);
+    int calculateMinRaise(GameContext context);
+    int calculateMaxBet(GameContext context);
+    boolean isBetValid(PlayerAction action, GameContext context);
 }
