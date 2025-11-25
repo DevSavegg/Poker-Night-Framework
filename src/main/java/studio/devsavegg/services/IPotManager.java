@@ -17,6 +17,13 @@ public interface IPotManager {
     void processBet(Player player, int amount);
 
     /**
+     * Forces the manager to recalculate side pots based on current contributions.
+     * This must be called at the end of betting rounds or before resolving pots
+     * to ensure "All-In" splits are handled correctly.
+     */
+    void calculateSidePots();
+
+    /**
      * Distributes the pots to winners based on hand ranks.
      * Handles main pot and all side pots.
      * @return A map of Player to the amount of chips won.
