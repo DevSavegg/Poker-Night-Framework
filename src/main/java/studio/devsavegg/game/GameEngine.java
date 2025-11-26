@@ -50,7 +50,7 @@ public class GameEngine {
         initializeHand();
 
         // Abstracted Forced Bets (Blinds/Antes handled by GameMode)
-        currentMode.executeForcedBets(tableManager, potManager, context);
+        currentMode.executeForcedBets(tableManager, potManager, context, roundBets);
 
         List<GamePhaseConfig> structure = currentMode.getStructure();
         boolean handEndedEarly = false;
