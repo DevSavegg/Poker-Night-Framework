@@ -9,6 +9,7 @@ import studio.devsavegg.services.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Omaha implements IGameMode {
 
@@ -67,7 +68,7 @@ public class Omaha implements IGameMode {
     }
 
     @Override
-    public void executeForcedBets(TableManager table, IPotManager potManager, GameContext context) {
+    public void executeForcedBets(TableManager table, IPotManager potManager, GameContext context, Map<Player, Integer> roundBets) {
         Player sbPlayer = table.getPlayerAt(table.getSmallBlindPos());
         Player bbPlayer = table.getPlayerAt(table.getBigBlindPos());
 
