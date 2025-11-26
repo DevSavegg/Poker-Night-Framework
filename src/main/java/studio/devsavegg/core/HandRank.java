@@ -1,5 +1,6 @@
 package studio.devsavegg.core;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,19 +27,21 @@ public class HandRank implements Comparable<HandRank> {
 
     private final RankType rankType;
     private final List<Rank> kickers; // Used to break ties within the same RankType
+    private final List<Card> bestFive;
 
-    public HandRank(RankType rankType, List<Rank> kickers) {
+    public HandRank(RankType rankType, List<Rank> kickers, List<Card> bestFive) {
         this.rankType = rankType;
         this.kickers = kickers;
+        this.bestFive = bestFive != null ? bestFive : Collections.emptyList();
     }
 
-    public RankType getRankType() {
-        return rankType;
+    public HandRank(RankType rankType, List<Rank> kickers) {
+        this(rankType, kickers, Collections.emptyList());
     }
 
-    public List<Rank> getKickers() {
-        return kickers;
-    }
+    public RankType getRankType() { return rankType; }
+    public List<Rank> getKickers() { return kickers; }
+    public List<Card> getBestFive() { return bestFive; }
 
     @Override
     public int compareTo(HandRank other) {

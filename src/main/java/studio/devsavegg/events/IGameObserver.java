@@ -72,4 +72,9 @@ public interface IGameObserver {
      * @param player The player who timed out.
      */
     void onPlayerTimeout(Player player);
+
+    /**
+     * Called when only one player remains with chips.
+     */
+    void onGameEnded(Player winner);
 }

@@ -77,4 +77,12 @@ public class ConsoleGameLogger implements IGameObserver {
     public void onPlayerTimeout(Player player) {
         System.out.println("!!! " + player.getName() + " timed out !!!");
     }
+
+    @Override
+    public void onGameEnded(Player winner) {
+        System.out.println("\n#################################");
+        System.out.println("   WINNER: " + winner.getName());
+        System.out.println("   Final Stack: " + winner.getChipStack());
+        System.out.println("#################################\n");
+    }
 }

@@ -1,0 +1,143 @@
+/* --- Global Variables & Root --- */
+.root {
+    /* Deep Gradient Background: "Midnight Lounge" */
+    -fx-background-color: radial-gradient(center 50% 50%, radius 80%, #18181b 0%, #000000 100%);
+    -fx-font-family: 'Segoe UI', 'Roboto', 'Helvetica', sans-serif;
+    -fx-font-size: 14px;
+}
+
+/* --- Typography --- */
+.header-text {
+    -fx-font-size: 32px;
+    -fx-font-weight: 800;
+    -fx-text-fill: linear-gradient(to bottom, #ffffff 0%, #a1a1aa 100%); /* Metallic Text */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 0, 0, 0, 2);
+}
+
+.sub-header {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #a1a1aa;
+}
+
+/* --- Glass Panels (The Modern Container) --- */
+.glass-panel {
+    -fx-background-color: rgba(30, 30, 35, 0.7); /* Translucent dark */
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(255, 255, 255, 0.08); /* Subtle highlight border */
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 20, 0, 0, 10);
+}
+
+/* --- Modern Buttons --- */
+.button {
+    -fx-background-color: linear-gradient(to bottom, #fbbf24 0%, #d97706 100%); /* Amber Gold */
+    -fx-text-fill: #1a0500;
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-padding: 10 24;
+    -fx-border-width: 0;
+    -fx-effect: dropshadow(gaussian, rgba(251, 191, 36, 0.3), 10, 0, 0, 0); /* Glow */
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom, #fcd34d 0%, #b45309 100%);
+    -fx-translate-y: -2;
+    -fx-effect: dropshadow(gaussian, rgba(251, 191, 36, 0.5), 15, 0, 0, 5);
+}
+
+.button:pressed {
+    -fx-background-color: #78350f;
+    -fx-translate-y: 1;
+    -fx-effect: none;
+}
+
+/* Action Variants */
+.action-button-fold {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: #ef4444;
+    -fx-border-color: #ef4444;
+    -fx-border-radius: 8;
+    -fx-effect: none;
+}
+.action-button-fold:hover {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+}
+
+.action-button-check {
+    -fx-background-color: linear-gradient(to bottom, #3b82f6 0%, #1d4ed8 100%); /* Blue */
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.3), 10, 0, 0, 0);
+}
+
+.action-button-raise {
+    -fx-background-color: linear-gradient(to bottom, #10b981 0%, #059669 100%); /* Emerald */
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.3), 10, 0, 0, 0);
+}
+
+/* --- The Poker Table (Felt) --- */
+.poker-table {
+    /* Radial Gradient for depth */
+    -fx-background-color: radial-gradient(focus-distance 0% , center 50% 50% , radius 60% , #153825, #081c12);
+    -fx-background-radius: 150;
+    -fx-border-color: #261f18; /* Wood trim simulation */
+    -fx-border-width: 8;
+    -fx-border-radius: 150;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 50, 0.2, 0, 20);
+}
+
+/* --- Player Seats (HUD Style) --- */
+.player-seat {
+    -fx-background-color: rgba(24, 24, 27, 0.8);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(255,255,255,0.1);
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 10;
+    -fx-min-width: 130px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 3);
+}
+
+.player-seat-active {
+    -fx-background-color: rgba(30, 41, 59, 0.9);
+    -fx-border-color: #fbbf24;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, #fbbf24, 15, 0.3, 0, 0); /* Gold Glow */
+}
+
+.player-seat-folded {
+    -fx-opacity: 0.4;
+    -fx-effect: none;
+}
+
+/* --- Inputs --- */
+.text-field {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #71717a;
+    -fx-background-radius: 6;
+    -fx-border-color: #3f3f46;
+    -fx-border-radius: 6;
+    -fx-padding: 8;
+}
+
+.text-field:focused {
+    -fx-border-color: #fbbf24;
+}
+
+/* --- Log --- */
+.game-log {
+    -fx-control-inner-background: rgba(0,0,0,0.5);
+    -fx-background-color: transparent;
+    -fx-text-fill: #d4d4d8;
+    -fx-font-family: 'Consolas', monospace;
+    -fx-font-size: 12px;
+}
+.game-log .viewport {
+    -fx-background-color: transparent;
+}

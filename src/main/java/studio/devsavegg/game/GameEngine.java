@@ -44,6 +44,16 @@ public class GameEngine {
             playHand();
             tableManager.moveButton();
         }
+
+        // --- Handle Game End ---
+        Player winner = tableManager.getAllPlayers().stream()
+                .filter(p -> p.getChipStack() > 0)
+                .findFirst()
+                .orElse(null);
+
+        if (winner != null) {
+            notifyObservers(o -> o.onGameEnded(winner));
+        }
     }
 
     private void playHand() {
