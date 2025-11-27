@@ -50,7 +50,15 @@ public class PokerTableController {
 
     public PokerTableController() {
         mainRoot = new StackPane();
-        mainRoot.getStylesheets().add("file:styles.css");
+
+        //mainRoot.getStylesheets().add("file:styles.css");
+        java.net.URL cssResource = getClass().getResource("/styles.css");
+        if (cssResource != null) {
+            mainRoot.getStylesheets().add(cssResource.toExternalForm());
+        } else {
+            System.err.println("Error: styles.css not found in resources!");
+        }
+
         mainRoot.getStyleClass().add("root");
 
         initHomeScreen();

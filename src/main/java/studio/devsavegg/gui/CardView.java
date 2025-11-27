@@ -14,6 +14,7 @@ import studio.devsavegg.core.Card;
 import studio.devsavegg.core.Suit;
 
 import java.io.File;
+import java.net.URL;
 
 public class CardView extends StackPane {
     private static final double WIDTH = 80;
@@ -26,11 +27,11 @@ public class CardView extends StackPane {
         setEffect(new DropShadow(10, 0, 5, Color.color(0, 0, 0, 0.4)));
 
         if (card != null) {
-            String imagePath = "img/Cards/" + card.getSuit().name() + "/" + card.getRank().name() + ".png";
-            File imgFile = new File(imagePath);
+            String resourcePath = "/img/Cards/" + card.getSuit().name() + "/" + card.getRank().name() + ".png";
+            URL imgUrl = getClass().getResource(resourcePath);
 
-            if (imgFile.exists()) {
-                Image img = new Image("file:" + imagePath);
+            if (imgUrl != null) {
+                Image img = new Image(imgUrl.toExternalForm());
                 ImageView imgView = new ImageView(img);
                 imgView.setFitWidth(WIDTH);
                 imgView.setFitHeight(HEIGHT);
