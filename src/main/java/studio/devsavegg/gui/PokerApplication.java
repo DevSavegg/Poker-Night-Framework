@@ -11,6 +11,7 @@ import studio.devsavegg.modes.TexasHoldemMode;
 import studio.devsavegg.services.*;
 
 import java.util.List;
+import javafx.scene.image.Image;
 
 public class PokerApplication extends Application {
     private GameEngine gameEngine;
@@ -28,6 +29,14 @@ public class PokerApplication extends Application {
         });
 
         primaryStage.setTitle("Poker Midnight - Casino Edition");
+
+        java.net.URL iconUrl = getClass().getResource("/icon.png");
+        if (iconUrl != null) {
+            primaryStage.getIcons().add(new Image(iconUrl.toExternalForm()));
+        } else {
+            System.out.println("Warning: icon.png not found.");
+        }
+
         primaryStage.setScene(controller.createScene());
         primaryStage.show();
     }

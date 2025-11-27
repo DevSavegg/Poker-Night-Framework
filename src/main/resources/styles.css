@@ -1,7 +1,11 @@
+/* Poker Midnight - Casino Edition
+    Theme: Midnight Lounge (Deep Green, Gold, and Glass)
+*/
+
 /* --- Global Variables & Root --- */
 .root {
     /* Deep Gradient Background: "Midnight Lounge" */
-    -fx-background-color: radial-gradient(center 50% 50%, radius 80%, #18181b 0%, #000000 100%);
+    -fx-background-color: radial-gradient(center 50% 50%, radius 100%, #14452f, #051b11);
     -fx-font-family: 'Segoe UI', 'Roboto', 'Helvetica', sans-serif;
     -fx-font-size: 14px;
 }
@@ -10,14 +14,15 @@
 .header-text {
     -fx-font-size: 32px;
     -fx-font-weight: 800;
-    -fx-text-fill: linear-gradient(to bottom, #ffffff 0%, #a1a1aa 100%); /* Metallic Text */
+    /* Metallic Text Gradient */
+    -fx-text-fill: linear-gradient(to bottom, #ffffff 0%, #a1a1aa 100%);
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 0, 0, 0, 2);
 }
 
 .sub-header {
     -fx-font-size: 16px;
     -fx-font-weight: 600;
-    -fx-text-fill: #a1a1aa;
+    -fx-text-fill: #a1a1aa; /* Light Grey */
 }
 
 /* --- Glass Panels (The Modern Container) --- */
@@ -30,39 +35,78 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 20, 0, 0, 10);
 }
 
-/* --- Modern Buttons --- */
+/* --- Modern Buttons Base Style --- */
 .button {
-    -fx-background-color: linear-gradient(to bottom, #fbbf24 0%, #d97706 100%); /* Amber Gold */
-    -fx-text-fill: #1a0500;
-    -fx-font-weight: 700;
-    -fx-font-size: 14px;
-    -fx-background-radius: 8;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
     -fx-cursor: hand;
-    -fx-padding: 10 24;
-    -fx-border-width: 0;
-    -fx-effect: dropshadow(gaussian, rgba(251, 191, 36, 0.3), 10, 0, 0, 0); /* Glow */
+    -fx-background-radius: 30px; /* Modern Pill Shape */
+    -fx-padding: 12 24;
+    -fx-effect: null; /* Remove default JavaFX shadows */
 }
 
-.button:hover {
+/* --- Button Variant 1: Primary "Gold" (New Game) --- */
+.button-primary {
+    -fx-background-color: #f59e0b; /* Modern Amber/Gold */
+    -fx-text-fill: #064e3b;        /* Dark Green Text for contrast */
+    -fx-border-color: transparent;
+}
+
+.button-primary:hover {
+    /* Shine effect on hover */
     -fx-background-color: linear-gradient(to bottom, #fcd34d 0%, #b45309 100%);
-    -fx-translate-y: -2;
-    -fx-effect: dropshadow(gaussian, rgba(251, 191, 36, 0.5), 15, 0, 0, 5);
+    -fx-effect: dropshadow(gaussian, rgba(245, 158, 11, 0.5), 15, 0.3, 0, 4); /* Soft Gold Glow */
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
 }
 
-.button:pressed {
+.button-primary:pressed {
     -fx-background-color: #78350f;
     -fx-translate-y: 1;
-    -fx-effect: none;
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
 }
 
-/* Action Variants */
+/* --- Button Variant 2: Secondary "Glass" (Settings) --- */
+.button-secondary {
+    -fx-background-color: rgba(255, 255, 255, 0.1); /* 10% White */
+    -fx-text-fill: #e2e8f0;                         /* Off-white text */
+    -fx-border-color: rgba(255, 255, 255, 0.2);     /* Subtle border */
+    -fx-border-radius: 30px;
+    -fx-border-width: 1px;
+}
+
+.button-secondary:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-text-fill: white;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* --- Button Variant 3: Tertiary "Ghost" (Exit) --- */
+.button-tertiary {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8; /* Muted Slate */
+    -fx-border-color: transparent;
+}
+
+.button-tertiary:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.15); /* Subtle Red tint */
+    -fx-text-fill: #ef4444; /* Red Text */
+}
+
+/* --- In-Game Action Buttons --- */
 .action-button-fold {
     -fx-background-color: rgba(255, 255, 255, 0.05);
     -fx-text-fill: #ef4444;
     -fx-border-color: #ef4444;
-    -fx-border-radius: 8;
+    -fx-border-radius: 30px;
+    -fx-background-radius: 30px;
     -fx-effect: none;
 }
+
 .action-button-fold:hover {
     -fx-background-color: #ef4444;
     -fx-text-fill: white;
@@ -74,13 +118,21 @@
     -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.3), 10, 0, 0, 0);
 }
 
+.action-button-check:hover {
+    -fx-background-color: linear-gradient(to bottom, #60a5fa 0%, #2563eb 100%);
+}
+
 .action-button-raise {
     -fx-background-color: linear-gradient(to bottom, #10b981 0%, #059669 100%); /* Emerald */
     -fx-text-fill: white;
     -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.3), 10, 0, 0, 0);
 }
 
-/* --- The Poker Table (Felt) --- */
+.action-button-raise:hover {
+     -fx-background-color: linear-gradient(to bottom, #34d399 0%, #059669 100%);
+}
+
+/* --- The Poker Table --- */
 .poker-table {
     /* Radial Gradient for depth */
     -fx-background-color: radial-gradient(focus-distance 0% , center 50% 50% , radius 60% , #153825, #081c12);
@@ -91,7 +143,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 50, 0.2, 0, 20);
 }
 
-/* --- Player Seats (HUD Style) --- */
+/* --- Player Seats --- */
 .player-seat {
     -fx-background-color: rgba(24, 24, 27, 0.8);
     -fx-background-radius: 12;

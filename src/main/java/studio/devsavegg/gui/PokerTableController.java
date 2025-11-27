@@ -16,9 +16,12 @@ import javafx.util.Duration;
 import studio.devsavegg.core.*;
 import studio.devsavegg.services.StandardHandEvaluator;
 
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class PokerTableController {
     private final StackPane mainRoot;
@@ -113,25 +116,40 @@ public class PokerTableController {
         homeScreen = new VBox(25);
         homeScreen.setAlignment(Pos.CENTER);
 
+        URL logoUrl = getClass().getResource("/Logo.png");
+
+        if (logoUrl != null) {
+            ImageView logoView = new ImageView(new Image(logoUrl.toExternalForm()));
+            logoView.setPreserveRatio(true);
+            logoView.setFitWidth(500);
+
+            logoView.setEffect(new javafx.scene.effect.DropShadow(20, Color.BLACK));
+
+            homeScreen.getChildren().add(logoView);
+        } else {
+            Label title = new Label("MIDNIGHT POKER");
+            title.getStyleClass().add("header-text");
+            title.setStyle("-fx-font-size: 42px;");
+            homeScreen.getChildren().add(title);
+        }
+
         Label title = new Label("MIDNIGHT POKER");
         title.getStyleClass().add("header-text");
         title.setStyle("-fx-font-size: 42px;");
 
         Button btnStart = new Button("NEW GAME");
-        btnStart.getStyleClass().add("button");
+        btnStart.getStyleClass().setAll("button", "button-primary");
         btnStart.setPrefWidth(220);
         btnStart.setOnAction(e -> showModeSelection());
 
         Button btnSettings = new Button("SETTINGS");
-        btnSettings.getStyleClass().add("button");
+        btnSettings.getStyleClass().setAll("button", "button-secondary");
         btnSettings.setPrefWidth(220);
-        btnSettings.setStyle("-fx-background-color: #3f3f46; -fx-text-fill: white;");
         btnSettings.setOnAction(e -> showSettings());
 
         Button btnExit = new Button("EXIT TO DESKTOP");
-        btnExit.getStyleClass().add("button");
+        btnExit.getStyleClass().setAll("button", "button-tertiary");
         btnExit.setPrefWidth(220);
-        btnExit.setStyle("-fx-background-color: transparent; -fx-text-fill: #71717a;");
         btnExit.setOnAction(e -> Platform.exit());
 
         homeScreen.getChildren().addAll(title, btnStart, btnSettings, btnExit);
@@ -477,7 +495,7 @@ public class PokerTableController {
                 }
             } else {
                 cardsBox.getChildren().add(new Label("(Folded)"));
-                cardsBox.getChildren().getFirst().setStyle("-fx-text-fill: #555;");
+                cardsBox.getChildren().get(0).setStyle("-fx-text-fill: #555;");
             }
 
             if (won > 0) {

@@ -21,7 +21,7 @@ public class StandardHandEvaluator implements IHandEvaluator {
             if (sfRanks != null) {
                 // Straight Flush: Find the 5 cards that make this straight
                 List<Card> sfHand = findCardsForStraight(flushCards, sfRanks);
-                if (sfRanks.getFirst() == Rank.ACE) {
+                if (sfRanks.get(0) == Rank.ACE) {
                     return new HandRank(RankType.ROYAL_FLUSH, Collections.emptyList(), sfHand);
                 }
                 return new HandRank(RankType.STRAIGHT_FLUSH, sfRanks, sfHand);

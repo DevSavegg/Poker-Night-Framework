@@ -60,7 +60,7 @@ public class DefaultPotManager implements IPotManager {
 
         while (!remainingContribs.isEmpty()) {
             // Find the smallest non-zero contribution among players who have NOT folded.
-            //    Folded players' money is "dead" and just fills the pot of the smallest active stack.
+            //    Folded players' money is "dead" and just fills the pot with the smallest active stack.
             int minStack = Integer.MAX_VALUE;
             boolean activePlayerFound = false;
 
@@ -145,7 +145,7 @@ public class DefaultPotManager implements IPotManager {
             }
 
             // Find the strongest hand among candidates
-            HandRank bestRank = showdownResults.get(candidates.getFirst());
+            HandRank bestRank = showdownResults.get(candidates.get(0));
             for (Player p : candidates) {
                 HandRank r = showdownResults.get(p);
                 if (r.compareTo(bestRank) > 0) {
@@ -171,7 +171,7 @@ public class DefaultPotManager implements IPotManager {
 
             // Give remainder (odd chip) to the first winner
             if (!winners.isEmpty() && remainder > 0) {
-                Player luckyOne = winners.getFirst();
+                Player luckyOne = winners.get(0);
                 totalWinnings.put(luckyOne, totalWinnings.getOrDefault(luckyOne, 0) + remainder);
             }
         }
