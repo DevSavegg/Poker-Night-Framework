@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"studio.devsavegg"},{"l":"studio.devsavegg.core"},{"l":"studio.devsavegg.events"},{"l":"studio.devsavegg.game"},{"l":"studio.devsavegg.gui"},{"l":"studio.devsavegg.modes"},{"l":"studio.devsavegg.services"}];updateSearchResults();

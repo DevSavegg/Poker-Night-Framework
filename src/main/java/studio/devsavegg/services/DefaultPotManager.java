@@ -5,18 +5,37 @@ import studio.devsavegg.core.Player;
 
 import java.util.*;
 
+/**
+ * Standard implementation of a Pot Manager for handling chips, main pots, and side pots.
+ * <p>
+ * # Principle - Single Responsibility Principle (SRP): Manages the financial state of the game round (pots and splits).
+ */
 public class DefaultPotManager implements IPotManager {
     private final List<SidePot> pots;
     // Tracks how much each player has put into the pot for the *current hand* total.
     private final Map<Player, Integer> currentHandContributions;
     private int totalPotSize;
 
+    /**
+     * Initializes a new DefaultPotManager.
+     * <p>
+     * # Design - Constructor: Sets up the initial empty state.
+     */
     public DefaultPotManager() {
         this.pots = new ArrayList<>();
         this.currentHandContributions = new HashMap<>();
         this.totalPotSize = 0;
     }
 
+    /**
+     * Resets internal state for a new hand.
+     * <p>
+     * Clears all existing pots and resets player contributions.
+     * <p>
+     * # Design - State: Resets the manager to a clean state for a new cycle.
+     *
+     * @param activePlayers The list of players participating in the new hand.
+     */
     @Override
     public void startNewHand(List<Player> activePlayers) {
         pots.clear();
@@ -29,6 +48,14 @@ public class DefaultPotManager implements IPotManager {
         }
     }
 
+    /**
+     * Processes a bet from a player, updating their contribution to the current pot.
+     * <p>
+     * # Design - Command: Executes the logic to add chips to the pool.
+     *
+     * @param player The player making the bet.
+     * @param amount The amount of chips being added.
+     */
     @Override
     public void processBet(Player player, int amount) {
         // Update the global tracker for this player's total contribution in this hand
@@ -38,16 +65,25 @@ public class DefaultPotManager implements IPotManager {
         totalPotSize += amount;
     }
 
+    /**
+     * Retrieves the total chips currently in all pots.
+     * <p>
+     * # Design - Accessor: Gets the total pot size.
+     *
+     * @return The integer total of all chips.
+     */
     @Override
     public int getCurrentTotal() {
         return totalPotSize;
     }
 
     /**
-     * Re-calculates the main pot and side pots based on the total money
-     * contributed by each player up to this point in the hand.
-     * * This MUST be called at the end of every betting round (before dealing next cards)
-     * and immediately before resolvePots() to ensure the SidePot objects are correct.
+     * Re-calculates the main pot and side pots based on total contributions.
+     * <p>
+     * This must be called at the end of betting rounds or before resolving pots
+     * to ensure "All-In" splits are handled correctly.
+     * <p>
+     * # Design - Algorithm: Complex logic for distributing chips into main and side pots.
      */
     public void calculateSidePots() {
         pots.clear();
@@ -124,6 +160,16 @@ public class DefaultPotManager implements IPotManager {
         }
     }
 
+    /**
+     * Distributes the pots to winners based on hand ranks.
+     * <p>
+     * Handles main pot and all side pots separately.
+     * <p>
+     * # Design - Algorithm: Logic for determining winners and splitting chips.
+     *
+     * @param showdownResults A map of players to their final hand ranks.
+     * @return A map of {@link Player} to the amount of chips won.
+     */
     @Override
     public Map<Player, Integer> resolvePots(Map<Player, HandRank> showdownResults) {
         // Ensure pots are calculated correctly before resolving

@@ -13,6 +13,8 @@ import java.util.Map;
 
 /**
  * Concrete implementation of No-Limit Texas Hold'em.
+ * <p>
+ * # Principle - Single Responsibility Principle (SRP): Encapsulates the specific rules, phases, and betting logic for Texas Hold'em.
  */
 public class TexasHoldemMode implements IGameMode {
     private final int smallBlind;
@@ -20,6 +22,14 @@ public class TexasHoldemMode implements IGameMode {
     private final IHandEvaluator evaluator;
     private final IBettingStructure bettingStructure;
 
+    /**
+     * Initializes the Texas Hold'em game mode.
+     * <p>
+     * # Design - Constructor: Sets up the configuration for the game.
+     *
+     * @param smallBlind The amount for the Small Blind.
+     * @param bigBlind The amount for the Big Blind.
+     */
     public TexasHoldemMode(int smallBlind, int bigBlind) {
         this.smallBlind = smallBlind;
         this.bigBlind = bigBlind;
@@ -27,11 +37,27 @@ public class TexasHoldemMode implements IGameMode {
         this.bettingStructure = new NoLimitStructure();
     }
 
+    /**
+     * Retrieves the name of this game variant.
+     * <p>
+     * # Design - Accessor: Gets the display name.
+     *
+     * @return The string "No Limit Texas Hold'em".
+     */
     @Override
     public String getName() {
         return "No Limit Texas Hold'em";
     }
 
+    /**
+     * Defines the sequential phases of a Texas Hold'em hand.
+     * <p>
+     * Includes Pre-Flop, Flop, Turn, and River.
+     * <p>
+     * # Design - Template Method: Provides the skeleton of steps for the Game Engine to execute.
+     *
+     * @return A list of {@link GamePhaseConfig} objects.
+     */
     @Override
     public List<GamePhaseConfig> getStructure() {
         List<GamePhaseConfig> phases = new ArrayList<>();
@@ -51,16 +77,40 @@ public class TexasHoldemMode implements IGameMode {
         return phases;
     }
 
+    /**
+     * Retrieves the hand evaluator for this mode.
+     * <p>
+     * # Design - Strategy: Returns the standard high-hand evaluator.
+     *
+     * @return The {@link IHandEvaluator}.
+     */
     @Override
     public IHandEvaluator getEvaluator() {
         return evaluator;
     }
 
+    /**
+     * Retrieves the betting structure.
+     * <p>
+     * # Design - Strategy: Returns the No-Limit structure.
+     *
+     * @return The {@link IBettingStructure}.
+     */
     @Override
     public IBettingStructure getBettingStructure() {
         return bettingStructure;
     }
 
+    /**
+     * Executes the mandatory blind bets for the round.
+     * <p>
+     * # Design - Command: Execution of forced financial transactions.
+     *
+     * @param table The table manager for player positions.
+     * @param potManager The pot manager to process chips.
+     * @param context The current game context.
+     * @param roundBetsTracker The map to record forced bets.
+     */
     @Override
     public void executeForcedBets(TableManager table, IPotManager potManager, GameContext context, Map<Player, Integer> roundBetsTracker) {
         // --- Small Blind ---

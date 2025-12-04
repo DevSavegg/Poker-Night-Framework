@@ -8,6 +8,13 @@ import studio.devsavegg.services.IPotManager;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * The central controller of the poker game.
+ * <p>
+ * Manages the flow of the game, including phases, betting rounds, and state transitions.
+ * <p>
+ * # Principle - Mediator Pattern / SRP: Coordinators the interaction between Players, Deck, Pot, and Rules without them coupled directly.
+ */
 public class GameEngine {
     private final Deck deck;
     private final IGameMode currentMode;
@@ -19,6 +26,17 @@ public class GameEngine {
     private final List<IGameObserver> observers = new ArrayList<>();
     private final Map<Player, Integer> roundBets = new HashMap<>();
 
+    /**
+     * Constructs the GameEngine with necessary dependencies.
+     * <p>
+     * # Design - Mediator: Initializes the central hub with its colleagues.
+     *
+     * @param mode The {@link IGameMode} ruleset to use.
+     * @param potManager The service for managing pot calculations.
+     * @param stateService The service for persistence (optional).
+     * @param inputService The service for retrieving player input.
+     * @param players The list of participants.
+     */
     public GameEngine(IGameMode mode, IPotManager potManager, IGameStateService stateService,
                       IPlayerInput inputService, List<Player> players) {
         this.currentMode = mode;
@@ -31,12 +49,23 @@ public class GameEngine {
         this.context.setActivePlayers(players);
     }
 
+    /**
+     * Registers an observer to receive game events.
+     * <p>
+     * # Design - Observer: Adds a listener to the subject.
+     *
+     * @param observer The {@link IGameObserver} implementation.
+     */
     public void registerObserver(IGameObserver observer) {
         this.observers.add(observer);
     }
 
     /**
-     * Main Game Loop
+     * Starts the main game loop.
+     * <p>
+     * Runs continuously until fewer than 2 players have chips remaining.
+     * <p>
+     * # Design - Template Method (Loose variation): Defines the high-level skeleton of the game lifecycle.
      */
     public void startGame() {
         // Continue as long as at least 2 players have chips
@@ -56,6 +85,13 @@ public class GameEngine {
         }
     }
 
+    /**
+     * Executes a single hand of poker.
+     * <p>
+     * Iterates through the phases defined by the current {@link IGameMode}.
+     * <p>
+     * # Design - Command / Sequencer: Executes a sequence of game phases.
+     */
     private void playHand() {
         initializeHand();
 
@@ -77,6 +113,11 @@ public class GameEngine {
         else resolveShowdown();
     }
 
+    /**
+     * Resets the game state for a new hand.
+     * <p>
+     * # Design - State: Resets transient state variables.
+     */
     private void initializeHand() {
         deck.reset();
         potManager.startNewHand(tableManager.getAllPlayers());
@@ -95,6 +136,13 @@ public class GameEngine {
         notifyObservers(o -> o.onGameStarted(context.getSnapshot()));
     }
 
+    /**
+     * Executes a specific phase of the game (e.g., Flop, Turn).
+     * <p>
+     * # Design - Strategy: Executes logic based on the configuration of the phase.
+     *
+     * @param phase The {@link GamePhaseConfig} to execute.
+     */
     private void executePhase(GamePhaseConfig phase) {
         notifyObservers(o -> o.onPhaseStart(phase.phaseName));
 
@@ -118,6 +166,13 @@ public class GameEngine {
 
     // -- Phase Helpers --
 
+    /**
+     * Deals hole cards to all eligible players.
+     * <p>
+     * # Design - Distributor: Distributes resources (cards) to participants.
+     *
+     * @param count The number of cards to deal to each player.
+     */
     private void dealHoleCards(int count) {
         for (Player p : tableManager.getAllPlayers()) {
             if (p.getChipStack() > 0 && !p.isSittingOut()) {
@@ -129,6 +184,13 @@ public class GameEngine {
         }
     }
 
+    /**
+     * Deals community cards to the board.
+     * <p>
+     * # Design - Distributor: Adds shared resources to the common context.
+     *
+     * @param count The number of cards to deal.
+     */
     private void dealCommunityCards(int count) {
         List<Card> newCards = new ArrayList<>();
         for (int i = 0; i < count; i++) {
@@ -138,6 +200,11 @@ public class GameEngine {
         notifyObservers(o -> o.onDealCommunity(newCards));
     }
 
+    /**
+     * Handles the draw phase where players can discard and replace cards.
+     * <p>
+     * # Design - Algorithm: Logic for the card exchange process.
+     */
     private void handleDrawPhase() {
         // Start from player after button
         int startPos = (tableManager.getButtonPosition() + 1) % tableManager.getAllPlayers().size();
@@ -177,6 +244,13 @@ public class GameEngine {
         }
     }
 
+    /**
+     * Resets betting metrics for the start of a new betting round.
+     * <p>
+     * # Design - State: Prepares state for a specific sub-routine.
+     *
+     * @param phaseName The name of the phase.
+     */
     private void prepareBettingRound(String phaseName) {
         // Reset betting metrics for new streets
         if (!phaseName.equalsIgnoreCase("Pre-Flop")) {
@@ -188,6 +262,15 @@ public class GameEngine {
 
     // -- Betting Loop --
 
+    /**
+     * Executes the betting logic for a round.
+     * <p>
+     * Cycles through players until betting is settled (everyone checks, folds, or matches the highest bet).
+     * <p>
+     * # Design - State Machine: Manages the states of a betting round (Bet, Call, Raise, Fold).
+     *
+     * @param phaseName The name of the phase.
+     */
     private void runBettingLoop(String phaseName) {
         // Determine starting player
         boolean isPreFlop = phaseName.equalsIgnoreCase("Pre-Flop");
@@ -282,6 +365,16 @@ public class GameEngine {
         }
     }
 
+    /**
+     * Validates and executes a betting action (Bet, Raise, Call).
+     * <p>
+     * # Design - Command: Executes the financial transaction of a bet.
+     *
+     * @param player The betting player.
+     * @param amount The amount to bet.
+     * @param type The type of action.
+     * @param isBlind Whether this is a forced blind bet.
+     */
     private void placeBet(Player player, int amount, ActionType type, boolean isBlind) {
         // Cap bet at player's stack first
         int actualAmount = Math.min(amount, player.getChipStack());
@@ -318,6 +411,11 @@ public class GameEngine {
 
     // -- Resolution --
 
+    /**
+     * Resolves the hand when multiple players remain at the end.
+     * <p>
+     * # Design - Algorithm: Logic for showdown evaluation and winner determination.
+     */
     private void resolveShowdown() {
         // Finalize pot structure (Handle all-in side pots)
         potManager.calculateSidePots();
@@ -340,6 +438,11 @@ public class GameEngine {
         distributeWinnings(winnings);
     }
 
+    /**
+     * Resolves the hand when all players but one have folded.
+     * <p>
+     * # Design - Algorithm: Logic for walkover victory.
+     */
     private void resolveWalk() {
         // Everyone folded except one
         Player winner = tableManager.getAllPlayers().stream()
@@ -352,6 +455,13 @@ public class GameEngine {
         distributeWinnings(winnings);
     }
 
+    /**
+     * Distributes winnings to players and updates persistence.
+     * <p>
+     * # Design - Command: Executes the payout.
+     *
+     * @param winnings A map of players to their won amounts.
+     */
     private void distributeWinnings(Map<Player, Integer> winnings) {
         winnings.forEach(Player::addChips);
         notifyObservers(o -> o.onHandEnded(winnings));
@@ -363,6 +473,14 @@ public class GameEngine {
 
     // -- Helpers & Validation --
 
+    /**
+     * Calculates the list of legal actions for a player in the current context.
+     * <p>
+     * # Design - Strategy/Validator: Determines valid moves based on game rules.
+     *
+     * @param p The player to check.
+     * @return A list of {@link ActionType}.
+     */
     private List<ActionType> getLegalActions(Player p) {
         int maxBet = currentMode.getBettingStructure().calculateMaxBet(context);
         List<ActionType> actions = new ArrayList<>();
@@ -385,6 +503,16 @@ public class GameEngine {
         return actions;
     }
 
+    /**
+     * Checks if the betting round is settled.
+     * <p>
+     * Betting is settled when all active players have acted and matched the highest bet.
+     * <p>
+     * # Design - State Inspector: Checks convergence of the betting state.
+     *
+     * @param actedThisStreet The set of players who have acted at least once.
+     * @return {@code true} if betting is closed, {@code false} otherwise.
+     */
     private boolean isBettingSettled(Set<Player> actedThisStreet) {
         List<Player> active = getActivePlayersList(); // Non-folded, Non-All-in
 
@@ -400,18 +528,39 @@ public class GameEngine {
         return true;
     }
 
+    /**
+     * Retrieves list of active players who are not All-In.
+     * <p>
+     * # Design - Filter: Helper method to filter stream.
+     *
+     * @return List of {@link Player}.
+     */
     private List<Player> getActivePlayersList() {
         return tableManager.getAllPlayers().stream()
                 .filter(p -> !p.isFolded() && !p.isAllIn())
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Counts how many players can still take actions (not folded, not all-in).
+     * <p>
+     * # Design - Aggregator: Helper calculation.
+     *
+     * @return The count of actionable players.
+     */
     private int countActionablePlayers() {
         return (int) tableManager.getAllPlayers().stream()
                 .filter(p -> !p.isFolded() && !p.isAllIn())
                 .count();
     }
 
+    /**
+     * Checks if the hand should end immediately (e.g., only 1 player left).
+     * <p>
+     * # Design - State Inspector: Checks termination condition.
+     *
+     * @return {@code true} if the hand should end.
+     */
     private boolean shouldEndHand() {
         long activeCount = tableManager.getAllPlayers().stream()
                 .filter(p -> !p.isFolded())
@@ -419,6 +568,13 @@ public class GameEngine {
         return activeCount < 2;
     }
 
+    /**
+     * Notifies all registered observers of an event.
+     * <p>
+     * # Design - Observer: Multicasts events to subscribers.
+     *
+     * @param action The action to perform on each observer.
+     */
     private void notifyObservers(java.util.function.Consumer<IGameObserver> action) {
         observers.forEach(action);
     }

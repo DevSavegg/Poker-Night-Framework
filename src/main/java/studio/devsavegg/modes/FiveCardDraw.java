@@ -10,57 +10,114 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Concrete implementation of Five Card Draw.
+ * <p>
+ * # Principle - Open/Closed Principle (OCP): Adds a new game variant without modifying existing engine logic.
+ */
 public class FiveCardDraw implements IGameMode {
 
     private final StandardHandEvaluator evaluator;
     private final IBettingStructure bettingStructure;
     private final int anteAmount;
 
+    /**
+     * Initializes Five Card Draw with default settings.
+     * <p>
+     * # Design - Constructor: Sets default ante to 10.
+     */
     public FiveCardDraw() {
         this.evaluator = new StandardHandEvaluator();
         this.bettingStructure = new NoLimitStructure();
-        this.anteAmount = 10; 
+        this.anteAmount = 10;
     }
 
+    /**
+     * Initializes Five Card Draw with a specific ante.
+     * <p>
+     * # Design - Constructor: Custom initialization.
+     *
+     * @param anteAmount The forced bet for every player.
+     */
     public FiveCardDraw(int anteAmount) {
         this.evaluator = new StandardHandEvaluator();
         this.bettingStructure = new NoLimitStructure();
         this.anteAmount = anteAmount;
     }
 
+    /**
+     * Retrieves the name of this game variant.
+     * <p>
+     * # Design - Accessor: Gets the display name.
+     *
+     * @return The string "Five Card Draw".
+     */
     @Override
     public String getName() {
         return "Five Card Draw";
     }
 
+    /**
+     * Retrieves the hand evaluator for this mode.
+     * <p>
+     * # Design - Strategy: Returns the evaluator strategy.
+     *
+     * @return The {@link IHandEvaluator}.
+     */
     @Override
     public IHandEvaluator getEvaluator() {
         return evaluator;
     }
 
+    /**
+     * Retrieves the betting structure.
+     * <p>
+     * # Design - Strategy: Returns the betting strategy.
+     *
+     * @return The {@link IBettingStructure}.
+     */
     @Override
     public IBettingStructure getBettingStructure() {
         return bettingStructure;
     }
 
+    /**
+     * Executes forced Ante bets for all players.
+     * <p>
+     * # Design - Command: Iterates over players to enforce antes.
+     *
+     * @param tableManager The table manager.
+     * @param potManager The pot manager.
+     * @param context The game context.
+     * @param roundBetsTracker The bet tracker.
+     */
     @Override
     public void executeForcedBets(TableManager tableManager, IPotManager potManager, GameContext context, Map<Player, Integer> roundBetsTracker) {
-       
+
         for (Player player : tableManager.getAllPlayers()) {
             if (player.getChipStack() > 0 && !player.isSittingOut()) {
                 int antePayment = Math.min(player.getChipStack(), anteAmount);
                 player.bet(antePayment);
                 potManager.processBet(player, antePayment);
-                roundBetsTracker.put(player, 0); 
-                
+                roundBetsTracker.put(player, 0);
+
                 System.out.println("  " + player.getName() + " pays $" + antePayment);
             }
         }
-        
+
         context.setPotTotal(potManager.getCurrentTotal());
         System.out.println("Pot: $" + context.getPotTotal() + "\n");
     }
 
+    /**
+     * Defines the sequential phases of Five Card Draw.
+     * <p>
+     * Includes Initial Deal, Draw Phase, and Betting rounds.
+     * <p>
+     * # Design - Template Method: Provides the game steps to the engine.
+     *
+     * @return A list of {@link GamePhaseConfig}.
+     */
     @Override
     public List<GamePhaseConfig> getStructure() {
         List<GamePhaseConfig> phases = new ArrayList<>();

@@ -5,9 +5,16 @@ import java.util.List;
 
 /**
  * Represents the final strength of a poker hand (e.g., Full House, Pair).
+ * <p>
+ * # Principle - Single Responsibility Principle (SRP): This class encapsulates the ranking logic and data for a hand.
  */
 public class HandRank implements Comparable<HandRank> {
 
+    /**
+     * Enumerates the standard poker hand categories by power.
+     * <p>
+     * # Principle - SRP: Defines hierarchy of hand types.
+     */
     public enum RankType {
         HIGH_CARD(1),
         PAIR(2),
@@ -29,12 +36,29 @@ public class HandRank implements Comparable<HandRank> {
     private final List<Rank> kickers; // Used to break ties within the same RankType
     private final List<Card> bestFive;
 
+    /**
+     * Constructs a HandRank with full details.
+     * <p>
+     * # Design - Constructor: Fully initializes the rank object.
+     *
+     * @param rankType The category of the hand.
+     * @param kickers The list of kickers for tie-breaking.
+     * @param bestFive The specific cards comprising the hand.
+     */
     public HandRank(RankType rankType, List<Rank> kickers, List<Card> bestFive) {
         this.rankType = rankType;
         this.kickers = kickers;
         this.bestFive = bestFive != null ? bestFive : Collections.emptyList();
     }
 
+    /**
+     * Constructs a HandRank without specifying the best five cards.
+     * <p>
+     * # Design - Adapter: Provides a simplified interface for initialization (adapts inputs).
+     *
+     * @param rankType The category of the hand.
+     * @param kickers The list of kickers for tie-breaking.
+     */
     public HandRank(RankType rankType, List<Rank> kickers) {
         this(rankType, kickers, Collections.emptyList());
     }
@@ -43,6 +67,16 @@ public class HandRank implements Comparable<HandRank> {
     public List<Rank> getKickers() { return kickers; }
     public List<Card> getBestFive() { return bestFive; }
 
+    /**
+     * Compares this hand rank with another to determine the winner.
+     * <p>
+     * This method implements a specific comparison algorithm (Category then Kickers).
+     * <p>
+     * # Design - Strategy: Implements the comparison strategy.
+     *
+     * @param other The HandRank to compare against.
+     * @return A negative integer, zero, or a positive integer as this hand is less than, equal to, or greater than the specified hand.
+     */
     @Override
     public int compareTo(HandRank other) {
         // Compare the broad category
@@ -66,6 +100,13 @@ public class HandRank implements Comparable<HandRank> {
         return 0; // Truly equal hands (split pot)
     }
 
+    /**
+     * Returns a string representation of the hand rank.
+     * <p>
+     * # Design - String Representation: Summarizes the rank.
+     *
+     * @return A descriptive string.
+     */
     @Override
     public String toString() {
         return rankType + " " + kickers;

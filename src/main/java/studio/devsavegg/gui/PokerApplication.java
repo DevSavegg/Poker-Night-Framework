@@ -13,13 +13,34 @@ import studio.devsavegg.services.*;
 import java.util.List;
 import javafx.scene.image.Image;
 
+/**
+ * Main JavaFX Application class.
+ * <p>
+ * Handles stage setup and game engine initialization.
+ * <p>
+ * # Principle - Single Responsibility Principle (SRP): Responsible for application lifecycle management.
+ */
 public class PokerApplication extends Application {
     private GameEngine gameEngine;
 
+    /**
+     * Main entry point for JavaFX.
+     * <p>
+     * # Design - Entry Point: Standard JavaFX launch.
+     *
+     * @param args Command arguments.
+     */
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Starts the primary stage and loads the initial scene.
+     * <p>
+     * # Design - Factory: Creates and wires the controller and scene.
+     *
+     * @param primaryStage The main window.
+     */
     @Override
     public void start(Stage primaryStage) {
         PokerTableController controller = new PokerTableController();
@@ -41,6 +62,15 @@ public class PokerApplication extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Initializes and starts the game engine in a background thread.
+     * <p>
+     * # Design - Factory / Builder: Assembles the GameEngine with correct dependencies (Mode, Services, Input).
+     *
+     * @param modeId The selected game mode identifier.
+     * @param players The list of players.
+     * @param controller The UI controller.
+     */
     private void startGame(String modeId, List<Player> players, PokerTableController controller) {
         IGameMode gameMode;
         switch (modeId) {

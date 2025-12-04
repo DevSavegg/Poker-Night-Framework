@@ -23,6 +23,14 @@ import java.util.function.BiConsumer;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+/**
+ * Main Controller for the Poker Game UI.
+ * <p>
+ * Manages the JavaFX scene graph, handles user interactions, and updates the view based on game state changes.
+ * Acts as the central coordinator between the visual components and the game logic.
+ * <p>
+ * # Principle - MVC Controller / Mediator: Mediates between the View (JavaFX nodes) and the Model (Game Engine).
+ */
 public class PokerTableController {
     private final StackPane mainRoot;
 
@@ -51,6 +59,11 @@ public class PokerTableController {
     private int initialChips = 1000;
     private BiConsumer<String, List<Player>> onGameStartRequest;
 
+    /**
+     * Constructs the controller and initializes the UI layout.
+     * <p>
+     * # Design - Composition: Assembles the initial visual structure from smaller UI components.
+     */
     public PokerTableController() {
         mainRoot = new StackPane();
 
@@ -103,6 +116,14 @@ public class PokerTableController {
         showHome();
     }
 
+    /**
+     * Helper to create consistent overlay containers.
+     * <p>
+     * # Design - Factory Method (Helper): Centralizes creation logic for overlay panes.
+     *
+     * @param title The title (unused in current impl but reserved for future).
+     * @return The configured VBox overlay.
+     */
     private VBox createOverlay(String title) {
         VBox overlay = new VBox(20);
         overlay.setAlignment(Pos.CENTER);
@@ -112,6 +133,11 @@ public class PokerTableController {
         return overlay;
     }
 
+    /**
+     * Initializes the Home Screen UI components.
+     * <p>
+     * # Design - Component Builder: Isolates Home Screen construction logic.
+     */
     private void initHomeScreen() {
         homeScreen = new VBox(25);
         homeScreen.setAlignment(Pos.CENTER);
@@ -156,6 +182,11 @@ public class PokerTableController {
         mainRoot.getChildren().add(homeScreen);
     }
 
+    /**
+     * Initializes the Settings Screen UI components.
+     * <p>
+     * # Design - Component Builder: Isolates Settings Screen construction logic.
+     */
     private void initSettingsScreen() {
         settingsScreen = new VBox(20);
         settingsScreen.setAlignment(Pos.CENTER);
@@ -220,6 +251,11 @@ public class PokerTableController {
         mainRoot.getChildren().add(settingsScreen);
     }
 
+    /**
+     * Initializes the main Game Screen UI components.
+     * <p>
+     * # Design - Component Builder: Isolates Game Screen construction logic.
+     */
     private void initGameScreen() {
         gameScreen = new BorderPane();
         gameScreen.setVisible(false);
@@ -249,6 +285,13 @@ public class PokerTableController {
         mainRoot.getChildren().addAll(gameScreen, privacyOverlay, resultsOverlay, winnerOverlay);
     }
 
+    /**
+     * Applies a fade-in animation to a VBox.
+     * <p>
+     * # Design - Animation / Transition: Handles visual state transitions seamlessly.
+     *
+     * @param node The node to fade in.
+     */
     private void fadeIn(VBox node) {
         node.setVisible(true);
         FadeTransition ft = new FadeTransition(Duration.millis(300), node);
@@ -257,6 +300,14 @@ public class PokerTableController {
         ft.play();
     }
 
+    /**
+     * Applies a fade-out animation to a VBox.
+     * <p>
+     * # Design - Animation / Transition: Handles visual state transitions seamlessly.
+     *
+     * @param node The node to fade out.
+     * @param onFinished Callback to run after animation completes.
+     */
     private void fadeOut(VBox node, Runnable onFinished) {
         FadeTransition ft = new FadeTransition(Duration.millis(200), node);
         ft.setFromValue(1.0);
@@ -268,17 +319,32 @@ public class PokerTableController {
         ft.play();
     }
 
+    /**
+     * Switches view to the Home Screen.
+     * <p>
+     * # Design - State Management: Updates visible scene context.
+     */
     public void showHome() {
         homeScreen.setVisible(true);
         settingsScreen.setVisible(false);
         gameScreen.setVisible(false);
     }
 
+    /**
+     * Switches view to the Settings Screen.
+     * <p>
+     * # Design - State Management: Updates visible scene context.
+     */
     public void showSettings() {
         homeScreen.setVisible(false);
         fadeIn(settingsScreen);
     }
 
+    /**
+     * Displays the game mode selection overlay.
+     * <p>
+     * # Design - Modal / Overlay: Temporary UI context for user decision.
+     */
     private void showModeSelection() {
         VBox modeSelect = new VBox(20);
         modeSelect.setAlignment(Pos.CENTER);
@@ -312,6 +378,14 @@ public class PokerTableController {
         fadeIn(modeSelect);
     }
 
+    /**
+     * Triggers the start of the game with the selected configuration.
+     * <p>
+     * # Design - Event Propagation: Notifies listeners to start the engine.
+     *
+     * @param mode The selected game mode ID.
+     * @param overlay The overlay to remove.
+     */
     private void launchGame(String mode, VBox overlay) {
         mainRoot.getChildren().remove(overlay);
         homeScreen.setVisible(false);
@@ -328,14 +402,35 @@ public class PokerTableController {
         }
     }
 
+    /**
+     * Registers a callback for game start requests.
+     * <p>
+     * # Design - Observer / Callback: Allows external binding to start events.
+     *
+     * @param listener The consumer to accept mode and player list.
+     */
     public void setOnGameStartRequest(BiConsumer<String, List<Player>> listener) {
         this.onGameStartRequest = listener;
     }
 
+    /**
+     * Creates the main JavaFX Scene.
+     * <p>
+     * # Design - Factory: Generates the Scene object for the Stage.
+     *
+     * @return The configured Scene.
+     */
     public Scene createScene() {
         return new Scene(mainRoot, 1280, 800);
     }
 
+    /**
+     * Generates seat UI elements for the active players.
+     * <p>
+     * # Design - Dynamic UI Generation: creates UI nodes based on model data.
+     *
+     * @param players The list of players in the game.
+     */
     public void initializeSeats(List<Player> players) {
         seatsContainer.getChildren().clear();
         playerSeats.clear();
@@ -363,15 +458,36 @@ public class PokerTableController {
         }
     }
 
+    /**
+     * Updates the phase label text.
+     * <p>
+     * # Design - View Update: Reflects model state in UI.
+     *
+     * @param phase The current game phase.
+     */
     public void updatePhase(String phase) {
         phaseLabel.setText(phase.toUpperCase());
         log(">>> " + phase.toUpperCase() + " <<<");
     }
 
+    /**
+     * Updates the pot total display.
+     * <p>
+     * # Design - View Update: Reflects model state in UI.
+     *
+     * @param total The total chips in the pot.
+     */
     public void updatePot(int total) {
         potLabel.setText("POT: $" + total);
     }
 
+    /**
+     * Updates the community cards display.
+     * <p>
+     * # Design - View Update: Reflects model state in UI.
+     *
+     * @param cards The list of community cards.
+     */
     public void updateCommunityCards(List<Card> cards) {
         communityCardsBox.getChildren().clear();
 
@@ -387,6 +503,13 @@ public class PokerTableController {
         }
     }
 
+    /**
+     * Updates a specific player's UI state (active, folded, chips).
+     * <p>
+     * # Design - View Update: Reflects model state in UI.
+     *
+     * @param p The player to update.
+     */
     public void updatePlayerState(Player p) {
         VBox seat = playerSeats.get(p);
         if (seat == null) return;
@@ -403,6 +526,13 @@ public class PokerTableController {
         }
     }
 
+    /**
+     * Visualizes dealing hole cards to a player (shows backs).
+     * <p>
+     * # Design - View Update: Reflects model state in UI.
+     *
+     * @param p The player receiving cards.
+     */
     public void dealHoleCards(Player p) {
         VBox seat = playerSeats.get(p);
         if (seat != null) {
@@ -414,10 +544,27 @@ public class PokerTableController {
         }
     }
 
+    /**
+     * Appends a message to the game log area.
+     * <p>
+     * # Design - Logging: Displays game history to user.
+     *
+     * @param message The text to log.
+     */
     public void log(String message) {
         gameLog.appendText(message + "\n");
     }
 
+    /**
+     * Displays the results of a round (showdown).
+     * <p>
+     * # Design - Overlay / Modal View: Presents complex result data over the game board.
+     *
+     * @param showdowns Map of player hands.
+     * @param winnings Map of winnings.
+     * @param communityCards The final board.
+     * @param onNext Callback to proceed to next hand.
+     */
     public void showRoundResults(Map<Player, HandRank> showdowns, Map<Player, Integer> winnings, List<Card> communityCards, Runnable onNext) {
         resultsOverlay.getChildren().clear();
         fadeIn(resultsOverlay);
@@ -525,6 +672,13 @@ public class PokerTableController {
         resultsOverlay.getChildren().add(nextBtn);
     }
 
+    /**
+     * Displays the final winner of the game.
+     * <p>
+     * # Design - Overlay / Modal View: Shows critical end-game state.
+     *
+     * @param winner The player who won the game.
+     */
     public void showGameWinner(Player winner) {
         winnerOverlay.getChildren().clear();
 
@@ -549,6 +703,18 @@ public class PokerTableController {
         fadeIn(winnerOverlay);
     }
 
+    /**
+     * Asynchronously prompts the user for an action (Bet, Fold, etc.).
+     * <p>
+     * Initiates the Privacy Screen -> Action UI flow.
+     * <p>
+     * # Design - Async / Future Pattern: Returns a promise that completes when user interacts.
+     *
+     * @param player The player acting.
+     * @param context The current game context.
+     * @param legal The list of legal actions.
+     * @return A CompletableFuture containing the user's chosen action.
+     */
     public CompletableFuture<PlayerAction> promptUserForAction(Player player, GameContext context, List<ActionType> legal) {
         CompletableFuture<PlayerAction> future = new CompletableFuture<>();
 
@@ -563,6 +729,14 @@ public class PokerTableController {
         return future;
     }
 
+    /**
+     * Shows an interstitial screen to hide cards between turns.
+     * <p>
+     * # Design - State Guard / Interstitial: Prevents info leakage in hot-seat multiplayer.
+     *
+     * @param player The player whose turn it is.
+     * @param onConfirm Callback to run when player confirms identity.
+     */
     private void showPrivacyScreen(Player player, Runnable onConfirm) {
         privacyOverlay.getChildren().clear();
         fadeIn(privacyOverlay);
@@ -595,6 +769,15 @@ public class PokerTableController {
         privacyOverlay.getChildren().addAll(turnLbl, instrLbl, btnIdentify);
     }
 
+    /**
+     * Constructs and displays the action buttons for the user.
+     * <p>
+     * # Design - Dynamic UI Update: Builds controls based on legal actions.
+     *
+     * @param player The acting player.
+     * @param context The game context.
+     * @param legal The list of allowed actions.
+     */
     private void revealActionUI(Player player, GameContext context, List<ActionType> legal) {
         controlsBox.getChildren().clear();
 
@@ -660,6 +843,15 @@ public class PokerTableController {
         }
     }
 
+    /**
+     * Asynchronously prompts the user for card discards (for Five Card Draw).
+     * <p>
+     * # Design - Async / Future Pattern: Returns a promise containing list of discards.
+     *
+     * @param player The acting player.
+     * @param context The game context.
+     * @return A CompletableFuture containing the list of cards to discard.
+     */
     public CompletableFuture<List<Card>> promptUserForDiscard(Player player, GameContext context) {
         CompletableFuture<List<Card>> future = new CompletableFuture<>();
         Platform.runLater(() -> {

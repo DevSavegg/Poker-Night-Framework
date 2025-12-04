@@ -2,7 +2,10 @@ package studio.devsavegg.core;
 
 /**
  * Represents the rank of a playing card.
+ * <p>
  * Values are assigned for comparison (2 being lowest, Ace being highest).
+ * <p>
+ * # Principle - Single Responsibility Principle (SRP): This enum encapsulates rank identity and its associated value.
  */
 public enum Rank {
     TWO(2),
@@ -26,13 +29,23 @@ public enum Rank {
     }
 
     /**
-     * Gets the numerical value of the rank.
-     * @return int value (2-14)
+     * Retrieves the numerical value of the rank.
+     * <p>
+     * # Design - Accessor: Exposes the internal value attribute safely.
+     *
+     * @return The int value (2-14) representing the card's strength.
      */
     public int getValue() {
         return value;
     }
 
+    /**
+     * Returns the capitalized name of the rank.
+     * <p>
+     * # Design - String Representation: Converts the enum constant to a readable string format.
+     *
+     * @return A string representing the rank (e.g., "Ace").
+     */
     @Override
     public String toString() {
         return name().charAt(0) + name().substring(1).toLowerCase();

@@ -11,70 +11,107 @@ import java.util.Map;
 
 /**
  * Observer interface for the Poker Game Engine.
+ * <p>
  * Implementations can register with the engine to receive real-time updates
  * about the game state, suitable for UI rendering or logging.
+ * <p>
+ * # Principle - Dependency Inversion Principle (DIP): High-level game logic depends on this abstraction rather than concrete UI or logging implementations.
  */
 public interface IGameObserver {
 
     /**
      * Called when the game engine starts a new session.
-     * @param context The initial state of the game.
+     * <p>
+     * # Design - Observer: Standard update method triggered by a state change subject.
+     *
+     * @param context The initial {@link GameContext} of the game.
      */
     void onGameStarted(GameContext context);
 
     /**
-     * Called when a new betting round or game phase begins (e.g., "Pre-Flop", "River").
-     * @param phaseName The name of the new phase.
+     * Called when a new betting round or game phase begins.
+     * <p>
+     * # Design - Observer: Standard update method triggered by a state change subject.
+     *
+     * @param phaseName The name of the new phase (e.g., "Pre-Flop", "River").
      */
     void onPhaseStart(String phaseName);
 
     /**
-     * Called immediately after a player performs an action (Bet, Fold, etc.).
-     * @param action The details of the action performed.
+     * Called immediately after a player performs an action.
+     * <p>
+     * # Design - Observer: Standard update method triggered by a state change subject.
+     *
+     * @param action The {@link PlayerAction} details containing actor, type, and amount.
      */
     void onPlayerAction(PlayerAction action);
 
     /**
      * Called when hole cards are dealt to a specific player.
-     * Note: For security, the actual Card objects might be masked for other players in a real UI,
+     * <p>
+     * Note: For security, the actual {@link Card} objects might be masked for other players in a real UI,
      * but the observer receives the event knowing cards were dealt.
-     * @param player The player receiving cards.
+     * <p>
+     * # Design - Observer: Standard update method triggered by a state change subject.
+     *
+     * @param player The {@link Player} receiving cards.
      * @param count The number of cards dealt.
      */
     void onDealHoleCards(Player player, int count);
 
     /**
-     * Called when community cards (Flop, Turn, River) are dealt to the board.
-     * @param cards The list of new cards dealt to the board.
+     * Called when community cards are dealt to the board.
+     * <p>
+     * # Design - Observer: Standard update method triggered by a state change subject.
+     *
+     * @param cards The list of new {@link Card} objects dealt to the board.
      */
     void onDealCommunity(List<Card> cards);
 
     /**
-     * Called when the pot total changes (usually after a betting round is consolidated).
+     * Called when the pot total changes.
+     * <p>
+     * This usually occurs after a betting round is consolidated.
+     * <p>
+     * # Design - Observer: Standard update method triggered by a state change subject.
+     *
      * @param total The new total amount in the pot.
      */
     void onPotUpdate(int total);
 
     /**
      * Called at the end of a hand if players reveal their cards.
-     * @param showdowns A map of players to their calculated hand ranks.
+     * <p>
+     * # Design - Observer: Standard update method triggered by a state change subject.
+     *
+     * @param showdowns A map of {@link Player} to their calculated {@link HandRank}.
      */
     void onShowdown(Map<Player, HandRank> showdowns);
 
     /**
      * Called when a hand concludes and chips are distributed.
-     * @param winnings A map of players to the amount of chips they won.
+     * <p>
+     * # Design - Observer: Standard update method triggered by a state change subject.
+     *
+     * @param winnings A map of {@link Player} to the amount of chips they won.
      */
     void onHandEnded(Map<Player, Integer> winnings);
 
     /**
      * Called when a player fails to act within the time limit.
-     * @param player The player who timed out.
+     * <p>
+     * # Design - Observer: Standard update method triggered by a state change subject.
+     *
+     * @param player The {@link Player} who timed out.
      */
     void onPlayerTimeout(Player player);
 
     /**
      * Called when only one player remains with chips.
+     * <p>
+     * # Design - Observer: Standard update method triggered by a state change subject.
+     *
+     * @param winner The {@link Player} who won the session.
      */
     void onGameEnded(Player winner);
 }
