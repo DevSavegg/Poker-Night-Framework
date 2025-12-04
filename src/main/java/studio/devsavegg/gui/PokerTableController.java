@@ -19,6 +19,7 @@ import studio.devsavegg.services.StandardHandEvaluator;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CancellationException;
 import java.util.function.BiConsumer;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -45,13 +46,18 @@ public class PokerTableController {
     private final VBox controlsBox;
     private final HBox seatsContainer;
 
+    // UI Overlay containers
     private final VBox privacyOverlay;
     private final VBox resultsOverlay;
     private final VBox winnerOverlay;
 
+    // State Tracking
     private final Map<Player, VBox> playerSeats = new HashMap<>();
+
+    // Future tracking for async user input
     private CompletableFuture<PlayerAction> pendingActionFuture;
     private CompletableFuture<List<Card>> pendingDiscardFuture;
+
     private final List<Card> selectedDiscards = new ArrayList<>();
     private Player currentActor;
     private final StandardHandEvaluator evaluator = new StandardHandEvaluator();
@@ -67,8 +73,8 @@ public class PokerTableController {
     public PokerTableController() {
         mainRoot = new StackPane();
 
-        //mainRoot.getStylesheets().add("file:styles.css");
-        java.net.URL cssResource = getClass().getResource("/styles.css");
+        // Load CSS safely
+        URL cssResource = getClass().getResource("/styles.css");
         if (cssResource != null) {
             mainRoot.getStylesheets().add(cssResource.toExternalForm());
         } else {
@@ -77,6 +83,7 @@ public class PokerTableController {
 
         mainRoot.getStyleClass().add("root");
 
+        // Initialize UI components
         initHomeScreen();
         initSettingsScreen();
 
@@ -107,7 +114,6 @@ public class PokerTableController {
         seatsContainer.setAlignment(Pos.CENTER);
         seatsContainer.setPadding(new Insets(10));
 
-
         privacyOverlay = createOverlay("Pass the Device");
         resultsOverlay = createOverlay("Round Results");
         winnerOverlay = createOverlay("Game Over");
@@ -120,9 +126,6 @@ public class PokerTableController {
      * Helper to create consistent overlay containers.
      * <p>
      * # Design - Factory Method (Helper): Centralizes creation logic for overlay panes.
-     *
-     * @param title The title (unused in current impl but reserved for future).
-     * @return The configured VBox overlay.
      */
     private VBox createOverlay(String title) {
         VBox overlay = new VBox(20);
@@ -133,24 +136,17 @@ public class PokerTableController {
         return overlay;
     }
 
-    /**
-     * Initializes the Home Screen UI components.
-     * <p>
-     * # Design - Component Builder: Isolates Home Screen construction logic.
-     */
+    // ... [Init methods remain largely the same, skipped for brevity in diff-check, but included in full file] ...
     private void initHomeScreen() {
         homeScreen = new VBox(25);
         homeScreen.setAlignment(Pos.CENTER);
 
         URL logoUrl = getClass().getResource("/Logo.png");
-
         if (logoUrl != null) {
             ImageView logoView = new ImageView(new Image(logoUrl.toExternalForm()));
             logoView.setPreserveRatio(true);
             logoView.setFitWidth(500);
-
             logoView.setEffect(new javafx.scene.effect.DropShadow(20, Color.BLACK));
-
             homeScreen.getChildren().add(logoView);
         } else {
             Label title = new Label("MIDNIGHT POKER");
@@ -159,9 +155,12 @@ public class PokerTableController {
             homeScreen.getChildren().add(title);
         }
 
-        Label title = new Label("MIDNIGHT POKER");
-        title.getStyleClass().add("header-text");
-        title.setStyle("-fx-font-size: 42px;");
+        // Ensure buttons are created even if logo fails
+        if (homeScreen.getChildren().isEmpty()) {
+            Label title = new Label("MIDNIGHT POKER");
+            title.getStyleClass().add("header-text");
+            homeScreen.getChildren().add(title);
+        }
 
         Button btnStart = new Button("NEW GAME");
         btnStart.getStyleClass().setAll("button", "button-primary");
@@ -178,15 +177,10 @@ public class PokerTableController {
         btnExit.setPrefWidth(220);
         btnExit.setOnAction(e -> Platform.exit());
 
-        homeScreen.getChildren().addAll(title, btnStart, btnSettings, btnExit);
+        homeScreen.getChildren().addAll(btnStart, btnSettings, btnExit);
         mainRoot.getChildren().add(homeScreen);
     }
 
-    /**
-     * Initializes the Settings Screen UI components.
-     * <p>
-     * # Design - Component Builder: Isolates Settings Screen construction logic.
-     */
     private void initSettingsScreen() {
         settingsScreen = new VBox(20);
         settingsScreen.setAlignment(Pos.CENTER);
@@ -251,11 +245,6 @@ public class PokerTableController {
         mainRoot.getChildren().add(settingsScreen);
     }
 
-    /**
-     * Initializes the main Game Screen UI components.
-     * <p>
-     * # Design - Component Builder: Isolates Game Screen construction logic.
-     */
     private void initGameScreen() {
         gameScreen = new BorderPane();
         gameScreen.setVisible(false);
@@ -285,13 +274,6 @@ public class PokerTableController {
         mainRoot.getChildren().addAll(gameScreen, privacyOverlay, resultsOverlay, winnerOverlay);
     }
 
-    /**
-     * Applies a fade-in animation to a VBox.
-     * <p>
-     * # Design - Animation / Transition: Handles visual state transitions seamlessly.
-     *
-     * @param node The node to fade in.
-     */
     private void fadeIn(VBox node) {
         node.setVisible(true);
         FadeTransition ft = new FadeTransition(Duration.millis(300), node);
@@ -300,14 +282,6 @@ public class PokerTableController {
         ft.play();
     }
 
-    /**
-     * Applies a fade-out animation to a VBox.
-     * <p>
-     * # Design - Animation / Transition: Handles visual state transitions seamlessly.
-     *
-     * @param node The node to fade out.
-     * @param onFinished Callback to run after animation completes.
-     */
     private void fadeOut(VBox node, Runnable onFinished) {
         FadeTransition ft = new FadeTransition(Duration.millis(200), node);
         ft.setFromValue(1.0);
@@ -319,32 +293,17 @@ public class PokerTableController {
         ft.play();
     }
 
-    /**
-     * Switches view to the Home Screen.
-     * <p>
-     * # Design - State Management: Updates visible scene context.
-     */
     public void showHome() {
         homeScreen.setVisible(true);
         settingsScreen.setVisible(false);
         gameScreen.setVisible(false);
     }
 
-    /**
-     * Switches view to the Settings Screen.
-     * <p>
-     * # Design - State Management: Updates visible scene context.
-     */
     public void showSettings() {
         homeScreen.setVisible(false);
         fadeIn(settingsScreen);
     }
 
-    /**
-     * Displays the game mode selection overlay.
-     * <p>
-     * # Design - Modal / Overlay: Temporary UI context for user decision.
-     */
     private void showModeSelection() {
         VBox modeSelect = new VBox(20);
         modeSelect.setAlignment(Pos.CENTER);
@@ -378,14 +337,6 @@ public class PokerTableController {
         fadeIn(modeSelect);
     }
 
-    /**
-     * Triggers the start of the game with the selected configuration.
-     * <p>
-     * # Design - Event Propagation: Notifies listeners to start the engine.
-     *
-     * @param mode The selected game mode ID.
-     * @param overlay The overlay to remove.
-     */
     private void launchGame(String mode, VBox overlay) {
         mainRoot.getChildren().remove(overlay);
         homeScreen.setVisible(false);
@@ -402,35 +353,14 @@ public class PokerTableController {
         }
     }
 
-    /**
-     * Registers a callback for game start requests.
-     * <p>
-     * # Design - Observer / Callback: Allows external binding to start events.
-     *
-     * @param listener The consumer to accept mode and player list.
-     */
     public void setOnGameStartRequest(BiConsumer<String, List<Player>> listener) {
         this.onGameStartRequest = listener;
     }
 
-    /**
-     * Creates the main JavaFX Scene.
-     * <p>
-     * # Design - Factory: Generates the Scene object for the Stage.
-     *
-     * @return The configured Scene.
-     */
     public Scene createScene() {
         return new Scene(mainRoot, 1280, 800);
     }
 
-    /**
-     * Generates seat UI elements for the active players.
-     * <p>
-     * # Design - Dynamic UI Generation: creates UI nodes based on model data.
-     *
-     * @param players The list of players in the game.
-     */
     public void initializeSeats(List<Player> players) {
         seatsContainer.getChildren().clear();
         playerSeats.clear();
@@ -458,25 +388,11 @@ public class PokerTableController {
         }
     }
 
-    /**
-     * Updates the phase label text.
-     * <p>
-     * # Design - View Update: Reflects model state in UI.
-     *
-     * @param phase The current game phase.
-     */
     public void updatePhase(String phase) {
         phaseLabel.setText(phase.toUpperCase());
         log(">>> " + phase.toUpperCase() + " <<<");
     }
 
-    /**
-     * Updates the pot total display.
-     * <p>
-     * # Design - View Update: Reflects model state in UI.
-     *
-     * @param total The total chips in the pot.
-     */
     public void updatePot(int total) {
         potLabel.setText("POT: $" + total);
     }
@@ -484,32 +400,38 @@ public class PokerTableController {
     /**
      * Updates the community cards display.
      * <p>
-     * # Design - View Update: Reflects model state in UI.
+     * # Optimization: Diff-based update to prevent UI flickering.
+     * Only adds new cards instead of clearing and redrawing all.
      *
      * @param cards The list of community cards.
      */
     public void updateCommunityCards(List<Card> cards) {
-        communityCardsBox.getChildren().clear();
+        if (cards == null) return;
 
-        communityCardsBox.setSpacing(5);
-        for (Card c : cards) {
-            CardView cv = new CardView(c);
-            communityCardsBox.getChildren().add(cv);
+        int currentCount = communityCardsBox.getChildren().size();
 
-            FadeTransition ft = new FadeTransition(Duration.millis(400), cv);
-            ft.setFromValue(0);
-            ft.setToValue(1);
-            ft.play();
+        // Case 1: New Hand (fewer cards than displayed) -> Clear all
+        if (cards.size() < currentCount) {
+            communityCardsBox.getChildren().clear();
+            currentCount = 0;
+        }
+
+        // Case 2: Append new cards only
+        if (cards.size() > currentCount) {
+            communityCardsBox.setSpacing(5);
+            for (int i = currentCount; i < cards.size(); i++) {
+                Card c = cards.get(i);
+                CardView cv = new CardView(c);
+                communityCardsBox.getChildren().add(cv);
+
+                FadeTransition ft = new FadeTransition(Duration.millis(400), cv);
+                ft.setFromValue(0);
+                ft.setToValue(1);
+                ft.play();
+            }
         }
     }
 
-    /**
-     * Updates a specific player's UI state (active, folded, chips).
-     * <p>
-     * # Design - View Update: Reflects model state in UI.
-     *
-     * @param p The player to update.
-     */
     public void updatePlayerState(Player p) {
         VBox seat = playerSeats.get(p);
         if (seat == null) return;
@@ -526,13 +448,6 @@ public class PokerTableController {
         }
     }
 
-    /**
-     * Visualizes dealing hole cards to a player (shows backs).
-     * <p>
-     * # Design - View Update: Reflects model state in UI.
-     *
-     * @param p The player receiving cards.
-     */
     public void dealHoleCards(Player p) {
         VBox seat = playerSeats.get(p);
         if (seat != null) {
@@ -544,28 +459,34 @@ public class PokerTableController {
         }
     }
 
-    /**
-     * Appends a message to the game log area.
-     * <p>
-     * # Design - Logging: Displays game history to user.
-     *
-     * @param message The text to log.
-     */
     public void log(String message) {
         gameLog.appendText(message + "\n");
     }
 
     /**
-     * Displays the results of a round (showdown).
+     * Helper to cancel any pending futures to prevent zombies/leaks.
      * <p>
-     * # Design - Overlay / Modal View: Presents complex result data over the game board.
-     *
-     * @param showdowns Map of player hands.
-     * @param winnings Map of winnings.
-     * @param communityCards The final board.
-     * @param onNext Callback to proceed to next hand.
+     * # Reliability: Ensures clean state transitions.
      */
+    private void cancelActivePrompts() {
+        if (pendingActionFuture != null && !pendingActionFuture.isDone()) {
+            pendingActionFuture.cancel(true);
+            pendingActionFuture = null;
+        }
+        if (pendingDiscardFuture != null && !pendingDiscardFuture.isDone()) {
+            pendingDiscardFuture.cancel(true);
+            pendingDiscardFuture = null;
+        }
+        // Force close overlays just in case
+        controlsBox.setVisible(false);
+        privacyOverlay.setVisible(false);
+        gameScreen.setEffect(null);
+    }
+
     public void showRoundResults(Map<Player, HandRank> showdowns, Map<Player, Integer> winnings, List<Card> communityCards, Runnable onNext) {
+        // Cancel inputs if round ended unexpectedly
+        cancelActivePrompts();
+
         resultsOverlay.getChildren().clear();
         fadeIn(resultsOverlay);
 
@@ -576,13 +497,16 @@ public class PokerTableController {
 
         HBox boardBox = new HBox(5);
         boardBox.setAlignment(Pos.CENTER);
-        if (communityCards != null) {
-            for (Card c : communityCards) {
-                CardView cv = new CardView(c);
-                boardBox.getChildren().add(cv);
-                boardViews.add(cv);
-            }
+
+        // # Robustness: Null check for community cards (e.g. pre-flop win)
+        List<Card> safeCommunityCards = communityCards != null ? communityCards : Collections.emptyList();
+
+        for (Card c : safeCommunityCards) {
+            CardView cv = new CardView(c);
+            boardBox.getChildren().add(cv);
+            boardViews.add(cv);
         }
+
         resultsOverlay.getChildren().addAll(title, boardBox);
 
         GridPane grid = new GridPane();
@@ -594,14 +518,17 @@ public class PokerTableController {
 
         Set<Player> players = new HashSet<>();
         if (showdowns != null) players.addAll(showdowns.keySet());
-        players.addAll(winnings.keySet());
+        if (winnings != null) players.addAll(winnings.keySet());
 
         for (Player p : players) {
             Label nameLbl = new Label(p.getName());
             nameLbl.setStyle("-fx-text-fill: white; -fx-font-size: 18px;");
 
             List<Card> winningCards = new ArrayList<>();
-            if (winnings.getOrDefault(p, 0) > 0 && showdowns != null && showdowns.containsKey(p)) {
+            // # Robustness: Null check for winnings map
+            int won = (winnings != null) ? winnings.getOrDefault(p, 0) : 0;
+
+            if (won > 0 && showdowns != null && showdowns.containsKey(p)) {
                 winningCards = showdowns.get(p).getBestFive();
             }
 
@@ -626,7 +553,6 @@ public class PokerTableController {
                 rankBox.getChildren().add(descLbl);
             }
 
-            int won = winnings.getOrDefault(p, 0);
             Label winLbl = new Label(won > 0 ? "+$" + won : "");
             winLbl.setStyle("-fx-text-fill: #2ecc71; -fx-font-weight: bold; -fx-font-size: 18px;");
 
@@ -646,9 +572,10 @@ public class PokerTableController {
             }
 
             if (won > 0) {
-                for(int i=0; i<communityCards.size(); i++) {
-                    Card c = communityCards.get(i);
-                    if (containsCard(winningCards, c)) {
+                for(int i=0; i<safeCommunityCards.size(); i++) {
+                    Card c = safeCommunityCards.get(i);
+                    // Safe access to boardViews using i, assuming sync
+                    if (i < boardViews.size() && containsCard(winningCards, c)) {
                         boardViews.get(i).setHighlight(true);
                     }
                 }
@@ -672,14 +599,8 @@ public class PokerTableController {
         resultsOverlay.getChildren().add(nextBtn);
     }
 
-    /**
-     * Displays the final winner of the game.
-     * <p>
-     * # Design - Overlay / Modal View: Shows critical end-game state.
-     *
-     * @param winner The player who won the game.
-     */
     public void showGameWinner(Player winner) {
+        cancelActivePrompts(); // Clear any pending UI state
         winnerOverlay.getChildren().clear();
 
         Label title = new Label("VICTORY");
@@ -703,19 +624,10 @@ public class PokerTableController {
         fadeIn(winnerOverlay);
     }
 
-    /**
-     * Asynchronously prompts the user for an action (Bet, Fold, etc.).
-     * <p>
-     * Initiates the Privacy Screen -> Action UI flow.
-     * <p>
-     * # Design - Async / Future Pattern: Returns a promise that completes when user interacts.
-     *
-     * @param player The player acting.
-     * @param context The current game context.
-     * @param legal The list of legal actions.
-     * @return A CompletableFuture containing the user's chosen action.
-     */
     public CompletableFuture<PlayerAction> promptUserForAction(Player player, GameContext context, List<ActionType> legal) {
+        // # Robustness: Cancel old futures so they don't hang indefinitely
+        cancelActivePrompts();
+
         CompletableFuture<PlayerAction> future = new CompletableFuture<>();
 
         Platform.runLater(() -> {
@@ -729,14 +641,6 @@ public class PokerTableController {
         return future;
     }
 
-    /**
-     * Shows an interstitial screen to hide cards between turns.
-     * <p>
-     * # Design - State Guard / Interstitial: Prevents info leakage in hot-seat multiplayer.
-     *
-     * @param player The player whose turn it is.
-     * @param onConfirm Callback to run when player confirms identity.
-     */
     private void showPrivacyScreen(Player player, Runnable onConfirm) {
         privacyOverlay.getChildren().clear();
         fadeIn(privacyOverlay);
@@ -769,15 +673,6 @@ public class PokerTableController {
         privacyOverlay.getChildren().addAll(turnLbl, instrLbl, btnIdentify);
     }
 
-    /**
-     * Constructs and displays the action buttons for the user.
-     * <p>
-     * # Design - Dynamic UI Update: Builds controls based on legal actions.
-     *
-     * @param player The acting player.
-     * @param context The game context.
-     * @param legal The list of allowed actions.
-     */
     private void revealActionUI(Player player, GameContext context, List<ActionType> legal) {
         controlsBox.getChildren().clear();
 
@@ -792,6 +687,13 @@ public class PokerTableController {
         HBox btnContainer = new HBox(15);
         btnContainer.setAlignment(Pos.CENTER);
 
+        // Feedback label for errors
+        Label errorLabel = new Label();
+        errorLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 14px;");
+
+        VBox layout = new VBox(15);
+        layout.setAlignment(Pos.CENTER);
+
         for (ActionType type : legal) {
             if (type == ActionType.BET || type == ActionType.RAISE) {
                 VBox actionGroup = new VBox(5);
@@ -802,9 +704,12 @@ public class PokerTableController {
                 amt.setPrefWidth(80);
                 amt.setAlignment(Pos.CENTER);
 
+                // Allow submitting with Enter key
+                amt.setOnAction(e -> handleActionSubmit(player, type, amt.getText(), errorLabel));
+
                 Button btn = new Button(type.name());
                 btn.getStyleClass().addAll("button", "action-button-raise");
-                btn.setOnAction(e -> handleActionSubmit(player, type, amt.getText()));
+                btn.setOnAction(e -> handleActionSubmit(player, type, amt.getText(), errorLabel));
 
                 actionGroup.getChildren().addAll(btn, amt);
                 btnContainer.getChildren().add(actionGroup);
@@ -814,21 +719,43 @@ public class PokerTableController {
                 if (type == ActionType.FOLD) btn.getStyleClass().add("action-button-fold");
                 if (type == ActionType.CHECK || type == ActionType.CALL) btn.getStyleClass().add("action-button-check");
 
-                btn.setOnAction(e -> handleActionSubmit(player, type, "0"));
+                btn.setOnAction(e -> handleActionSubmit(player, type, "0", errorLabel));
                 btnContainer.getChildren().add(btn);
             }
         }
 
-        controlsBox.getChildren().addAll(rankLabel, myCards, btnContainer);
+        layout.getChildren().addAll(rankLabel, myCards, btnContainer, errorLabel);
+        controlsBox.getChildren().add(layout);
         fadeIn(controlsBox);
     }
 
-    private void handleActionSubmit(Player player, ActionType type, String amountStr) {
+    /**
+     * Handles action submission with input validation.
+     * <p>
+     * # Robustness: Validates input BEFORE resolving the future.
+     * Does not close the UI if input is invalid.
+     */
+    private void handleActionSubmit(Player player, ActionType type, String amountStr, Label errorLabel) {
         try {
             int amount = 0;
             if (!amountStr.isEmpty()) amount = Integer.parseInt(amountStr);
             if (type == ActionType.ALL_IN) amount = player.getChipStack();
 
+            // Validation Logic
+            if (amount < 0) {
+                errorLabel.setText("Cannot bet negative amount!");
+                return;
+            }
+            if ((type == ActionType.BET || type == ActionType.RAISE) && amount > player.getChipStack()) {
+                errorLabel.setText("Not enough chips!");
+                return;
+            }
+            if ((type == ActionType.BET || type == ActionType.RAISE) && amount == 0) {
+                errorLabel.setText("Amount required!");
+                return;
+            }
+
+            // Valid input - Proceed
             PlayerAction action = new PlayerAction(player, type, amount);
 
             fadeOut(controlsBox, () -> {
@@ -839,20 +766,14 @@ public class PokerTableController {
             });
 
         } catch (NumberFormatException e) {
-            log("Invalid Amount");
+            // # UX: User feedback instead of silent failure
+            errorLabel.setText("Invalid number format!");
         }
     }
 
-    /**
-     * Asynchronously prompts the user for card discards (for Five Card Draw).
-     * <p>
-     * # Design - Async / Future Pattern: Returns a promise containing list of discards.
-     *
-     * @param player The acting player.
-     * @param context The game context.
-     * @return A CompletableFuture containing the list of cards to discard.
-     */
     public CompletableFuture<List<Card>> promptUserForDiscard(Player player, GameContext context) {
+        cancelActivePrompts(); // Clear previous inputs
+
         CompletableFuture<List<Card>> future = new CompletableFuture<>();
         Platform.runLater(() -> {
             this.currentActor = player;
